@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "CanvasViewController.getFrames(aroundIndex:):CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.frames">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in closure #2 in ViewController.writeImagesAsMovie(allImages:videoPath:videoSize:videoFPS:):ViewController.swift">
          <PersistentStrings>
             <PersistentString

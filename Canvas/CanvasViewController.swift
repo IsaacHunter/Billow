@@ -74,7 +74,9 @@ class CanvasViewController: UIViewController {
         }
     }
     
-    var videoUrl:URL! // use your own url
+    var videoUrl:URL!
+    var asset:AVAsset! = nil
+    var duration:Float64 = 0.0
     var frames:[UIImage?]!
     var sketches:[[CALayer]?]!
     private var generator:AVAssetImageGenerator!
@@ -82,10 +84,10 @@ class CanvasViewController: UIViewController {
     var imagePicker = UIImagePickerController()
     
     func getFrames(aroundIndex: Int) {
-        let asset:AVAsset = AVAsset(url:self.videoUrl) // these should be sitting locally
-        let duration:Float64 = CMTimeGetSeconds(asset.duration) // should be sitting locally
         var times:[CMTime] = []
         let maxIndex:Int = Int(duration*10)
+        
+        // loop through frames 10 before and 10 after index and any frames that are nil, add the time to populate async later
         for i:Int in max(0,aroundIndex-10) ..< min(maxIndex,aroundIndex+10) {
             if (frames[i] == nil) {
                 let fromTime = ((3.0*Float64(i))+1)/30.0
@@ -93,6 +95,8 @@ class CanvasViewController: UIViewController {
                 times.append(time)
             }
         }
+        
+        // this is where we populate nil frames
         if (times.count > 0) {
             self.generator = AVAssetImageGenerator(asset:asset) // possibly be sitting locally and just be refreshed when importing new footage
             self.generator.appliesPreferredTrackTransform = true
@@ -110,26 +114,14 @@ class CanvasViewController: UIViewController {
                 }
             }
         }
-    }
-    
-    func getAllFrames(export: Bool) {
-        let asset:AVAsset = AVAsset(url:self.videoUrl)
-        let duration:Float64 = CMTimeGetSeconds(asset.duration)
-        self.generator = AVAssetImageGenerator(asset:asset)
-        self.generator.appliesPreferredTrackTransform = true
-        self.generator.requestedTimeToleranceBefore = kCMTimeZero
-        self.generator.requestedTimeToleranceAfter = kCMTimeZero
-        self.frames = []
-        if (export) {
-            for index:Int in 0 ..< Int(duration*30) {
-                self.getFrame(fromTime:(Float64(index)/30.0))
-            }
-        } else {
-            for index:Int in 0 ..< Int(duration*10) {
-                self.getFrame(fromTime:((3.0*Float64(index))+1)/30.0)
-            }
+        
+        // now remove any frames that are not 20 before index or 20 after index so memory doesn't fill up
+        for i:Int in 0 ..< max(0,aroundIndex-20) {
+            frames[i] = nil
         }
-        self.generator = nil
+        for i:Int in min(maxIndex,aroundIndex+20) ..< maxIndex {
+            frames[i] = nil
+        }
     }
     
     private func getFrame(fromTime:Float64) {
@@ -150,17 +142,6 @@ class CanvasViewController: UIViewController {
         canvasView.lineColor = UIColor.white
         canvasView.lineWidth = 10
         self.pressColor(whiteBtn)
-        
-//        self.videoUrl = Bundle.main.url(forResource: "IMG_0171", withExtension: "MOV")
-        
-//        let asset:AVAsset = AVAsset(url:self.videoUrl) // these should be sitting locally
-//        let duration:Float64 = CMTimeGetSeconds(asset.duration) // should be sitting locally
-//        let maxIndex:Int = Int(duration*10)
-        
-//        self.frames = [UIImage?](repeating: nil, count: maxIndex)
-//        self.sketches = [[CALayer]?](repeating: nil, count: maxIndex)
-//        getFrames(aroundIndex: 0)
-//        showFrame(0)
         imagePicker.delegate = self
     }
 
@@ -213,8 +194,6 @@ class CanvasViewController: UIViewController {
     }
     
     func writeImagesAsMovie(videoPath: URL, videoSize: CGSize, videoFPS: Int32) {
-        let asset:AVAsset = AVAsset(url:self.videoUrl)
-        let duration:Float64 = CMTimeGetSeconds(asset.duration)
         self.generator = AVAssetImageGenerator(asset:asset)
         self.generator.appliesPreferredTrackTransform = true
         self.generator.requestedTimeToleranceBefore = kCMTimeZero
@@ -490,10 +469,9 @@ extension CanvasViewController : UIImagePickerControllerDelegate, UINavigationCo
                                 self.canvasView.canDraw = true
                                 self.launchView.isHidden = true
                                 self.pressColor(self.whiteBtn)
-                                
-                                let asset:AVAsset = AVAsset(url:self.videoUrl) // these should be sitting locally
-                                let duration:Float64 = CMTimeGetSeconds(asset.duration) // should be sitting locally
-                                let maxIndex:Int = Int(duration*10)
+                                self.asset = AVAsset(url:self.videoUrl)
+                                self.duration = CMTimeGetSeconds(asset.duration)
+                                let maxIndex:Int = Int(self.duration*10)
                                 self.frames = [UIImage?](repeating: nil, count: maxIndex)
                                 self.sketches = [[CALayer]?](repeating: nil, count: maxIndex)
                                 self.getFrames(aroundIndex: 0)
