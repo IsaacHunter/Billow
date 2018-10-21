@@ -139,10 +139,17 @@ class CanvasViewController: UIViewController {
     
     override func viewDidLoad() {
         spinner.startAnimating()
-        canvasView.lineColor = UIColor.white
-        canvasView.lineWidth = 10
-        self.pressColor(whiteBtn)
         imagePicker.delegate = self
+        self.videoUrl = UserDefaults.standard.url(forKey: "videoUrl")
+        if (self.videoUrl != nil) {
+            DispatchQueue.main.async {
+                self.initVideo()
+                let decoded  = UserDefaults.standard.object(forKey: "sketches") as! Data?
+                if (decoded != nil) {
+                    self.sketches = NSKeyedUnarchiver.unarchiveObject(with: decoded!) as! [[CALayer]?]?
+                }
+            }
+        }
     }
 
     @IBAction func clearCanvas(_ sender: Any) {
@@ -175,6 +182,12 @@ class CanvasViewController: UIViewController {
             }
         }
         currentFrame = i
+        DispatchQueue.main.async {
+            var userDefaults = UserDefaults.standard
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: self.sketches)
+            userDefaults.set(encodedData, forKey: "sketches")
+            userDefaults.synchronize()
+        }
     }
     
     @IBAction func export(_ sender: Any) {
@@ -444,6 +457,21 @@ class CanvasViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    func initVideo() {
+        self.canvasView.lineColor = UIColor.white
+        self.canvasView.lineWidth = 10
+        self.canvasView.canDraw = true
+        self.launchView.isHidden = true
+        self.pressColor(self.whiteBtn)
+        self.asset = AVAsset(url:self.videoUrl)
+        self.duration = CMTimeGetSeconds(self.asset.duration)
+        let maxIndex:Int = Int(self.duration*10)
+        self.frames = [UIImage?](repeating: nil, count: maxIndex)
+        self.sketches = [[CALayer]?](repeating: nil, count: maxIndex)
+        self.getFrames(aroundIndex: 0)
+        self.showFrame(0)
+    }
 }
 
 extension CanvasViewController : UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -453,36 +481,22 @@ extension CanvasViewController : UIImagePickerControllerDelegate, UINavigationCo
             if let phAsset = fetchResult.firstObject as? PHAsset {
                 PHImageManager.default().requestAVAsset(forVideo: phAsset, options: PHVideoRequestOptions(), resultHandler: { (asset, audioMix, info) -> Void in
                     if let asset = asset as? AVURLAsset {
-                        let videoData = NSData(contentsOf: asset.url)
+                        self.videoUrl = asset.url
+                        UserDefaults.standard.set(self.videoUrl, forKey: "videoUrl")
+//
+//                        // optionally, write the video to the temp directory
+//                        let videoPath = NSTemporaryDirectory() + "tmpMovie.MOV"
+//                        let videoURL = NSURL(fileURLWithPath: videoPath)
+//                        let writeResult = videoData?.write(to: videoURL as URL, atomically: true)
                         
-                        // optionally, write the video to the temp directory
-                        let videoPath = NSTemporaryDirectory() + "tmpMovie.MOV"
-                        let videoURL = NSURL(fileURLWithPath: videoPath)
-                        let writeResult = videoData?.write(to: videoURL as URL, atomically: true)
+//                        if let writeResult = writeResult, writeResult {
+//                            self.videoUrl = videoURL as URL
                         
-                        if let writeResult = writeResult, writeResult {
-                            self.videoUrl = videoURL as URL
                             print("success")
                             DispatchQueue.main.async {
-                                self.canvasView.lineColor = UIColor.white
-                                self.canvasView.lineWidth = 10
-                                self.canvasView.canDraw = true
-                                self.launchView.isHidden = true
-                                self.pressColor(self.whiteBtn)
-                                self.asset = AVAsset(url:self.videoUrl)
-                                self.duration = CMTimeGetSeconds(asset.duration)
-                                let maxIndex:Int = Int(self.duration*10)
-                                self.frames = [UIImage?](repeating: nil, count: maxIndex)
-                                self.sketches = [[CALayer]?](repeating: nil, count: maxIndex)
-                                self.getFrames(aroundIndex: 0)
-                                self.showFrame(0)
+                                self.initVideo()
                                 self.dismiss(animated: true, completion: nil)
                             }
-                        }
-                        else {
-                            print("failure")
-                            self.dismiss(animated: true, completion: nil)
-                        }
                     }
                 })
             }

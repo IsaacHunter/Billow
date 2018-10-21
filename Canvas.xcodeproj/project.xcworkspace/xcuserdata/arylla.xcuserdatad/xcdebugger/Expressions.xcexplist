@@ -3,12 +3,7 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "CanvasViewController.getFrames(aroundIndex:):CanvasViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.frames">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "CanvasViewController.initVideo():CanvasViewController.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in closure #2 in ViewController.writeImagesAsMovie(allImages:videoPath:videoSize:videoFPS:):ViewController.swift">
@@ -18,6 +13,22 @@
             </PersistentString>
             <PersistentString
                value = "audioAsset.duration">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "CanvasViewController.getFrames(aroundIndex:):CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.frames">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in CanvasViewController.imagePickerController(_:didFinishPickingMediaWithInfo:):CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "asset.url">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
