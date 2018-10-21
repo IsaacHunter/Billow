@@ -8,26 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		52A444861FD1B02400538A11 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A444851FD1B02400538A11 /* AppDelegate.swift */; };
-		52A444881FD1B02400538A11 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A444871FD1B02400538A11 /* ViewController.swift */; };
 		52A4448B1FD1B02400538A11 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52A444891FD1B02400538A11 /* Main.storyboard */; };
 		52A4448D1FD1B02400538A11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 52A4448C1FD1B02400538A11 /* Assets.xcassets */; };
 		52A444901FD1B02400538A11 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52A4448E1FD1B02400538A11 /* LaunchScreen.storyboard */; };
 		52A444981FD1B06D00538A11 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A444971FD1B06D00538A11 /* CanvasView.swift */; };
-		77202728216A4EF9001CE9AA /* IMG_0035.mov in Resources */ = {isa = PBXBuildFile; fileRef = 77202727216A4EF9001CE9AA /* IMG_0035.mov */; };
-		7720272A216D1F1C001CE9AA /* IMG_0171.MOV in Resources */ = {isa = PBXBuildFile; fileRef = 77202729216D1F1C001CE9AA /* IMG_0171.MOV */; };
+		778B5E82217D204300A641CF /* CanvasViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A444871FD1B02400538A11 /* CanvasViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		52A444821FD1B02400538A11 /* Canvas.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Canvas.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		52A444851FD1B02400538A11 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		52A444871FD1B02400538A11 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		52A444871FD1B02400538A11 /* CanvasViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewController.swift; sourceTree = "<group>"; };
 		52A4448A1FD1B02400538A11 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		52A4448C1FD1B02400538A11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		52A4448F1FD1B02400538A11 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		52A444911FD1B02400538A11 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52A444971FD1B06D00538A11 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
-		77202727216A4EF9001CE9AA /* IMG_0035.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; name = IMG_0035.mov; path = ../../IMG_0035.mov; sourceTree = "<group>"; };
-		77202729216D1F1C001CE9AA /* IMG_0171.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; name = IMG_0171.MOV; path = ../../IMG_0171.MOV; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,14 +57,12 @@
 			isa = PBXGroup;
 			children = (
 				52A444851FD1B02400538A11 /* AppDelegate.swift */,
-				52A444871FD1B02400538A11 /* ViewController.swift */,
+				52A444871FD1B02400538A11 /* CanvasViewController.swift */,
 				52A444971FD1B06D00538A11 /* CanvasView.swift */,
 				52A444891FD1B02400538A11 /* Main.storyboard */,
 				52A4448C1FD1B02400538A11 /* Assets.xcassets */,
 				52A4448E1FD1B02400538A11 /* LaunchScreen.storyboard */,
 				52A444911FD1B02400538A11 /* Info.plist */,
-				77202727216A4EF9001CE9AA /* IMG_0035.mov */,
-				77202729216D1F1C001CE9AA /* IMG_0171.MOV */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -100,7 +94,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0910;
-				LastUpgradeCheck = 0910;
+				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = "Brian Advent";
 				TargetAttributes = {
 					52A444811FD1B02400538A11 = {
@@ -132,10 +126,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				77202728216A4EF9001CE9AA /* IMG_0035.mov in Resources */,
 				52A444901FD1B02400538A11 /* LaunchScreen.storyboard in Resources */,
 				52A4448D1FD1B02400538A11 /* Assets.xcassets in Resources */,
-				7720272A216D1F1C001CE9AA /* IMG_0171.MOV in Resources */,
 				52A4448B1FD1B02400538A11 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -147,8 +139,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52A444881FD1B02400538A11 /* ViewController.swift in Sources */,
 				52A444861FD1B02400538A11 /* AppDelegate.swift in Sources */,
+				778B5E82217D204300A641CF /* CanvasViewController.swift in Sources */,
 				52A444981FD1B06D00538A11 /* CanvasView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,6 +181,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -196,6 +189,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -246,6 +240,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -253,6 +248,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

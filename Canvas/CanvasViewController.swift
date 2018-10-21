@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  CanvasViewController.swift
 //  Canvas
 //
 //  Created by Brian Advent on 01.12.17.
@@ -10,13 +10,23 @@ import UIKit
 import AVFoundation
 import Photos
 
-class ViewController: UIViewController {
+class CanvasViewController: UIViewController {
 
+    @IBOutlet var launchView: UIView!
     @IBOutlet weak var canvasView: CanvasView!
     @IBOutlet var spinner: UIActivityIndicatorView!
     @IBOutlet var bgView: UIImageView!
     @IBOutlet var triangleConstraint: NSLayoutConstraint!
     @IBOutlet var sliderConstraint: NSLayoutConstraint!
+    @IBOutlet var progress: UIProgressView!
+    @IBOutlet var whiteBtn: UIButton!
+    @IBOutlet var blackBtn: UIButton!
+    @IBOutlet var pinkBtn: UIButton!
+    @IBOutlet var blueBtn: UIButton!
+    @IBOutlet var eraseBtn: UIButton!
+    let pink:UIColor = UIColor(red: 0.9922, green: 0.9297, blue: 0.9375, alpha: 1)
+    let blue:UIColor = UIColor(red: 0.8828, green: 0.9609, blue: 0.9570, alpha: 1)
+    
     @IBAction func sliderDown(_ sender: Any) {
         triangleConstraint.constant = 15
         sliderConstraint.constant = -120
@@ -27,15 +37,6 @@ class ViewController: UIViewController {
         sliderConstraint.constant = -150
         canvasView.lineWidth = CGFloat(sender.value)
     }
-    
-    @IBOutlet var progress: UIProgressView!
-    @IBOutlet var whiteBtn: UIButton!
-    @IBOutlet var blackBtn: UIButton!
-    @IBOutlet var pinkBtn: UIButton!
-    @IBOutlet var blueBtn: UIButton!
-    @IBOutlet var eraseBtn: UIButton!
-    let pink:UIColor = UIColor(red: 0.9922, green: 0.9297, blue: 0.9375, alpha: 1)
-    let blue:UIColor = UIColor(red: 0.8828, green: 0.9609, blue: 0.9570, alpha: 1)
     
     @IBAction func pressColor(_ sender: UIButton) {
         switch canvasView.lineColor {
@@ -466,7 +467,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController : UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+extension CanvasViewController : UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let referenceURL = info[UIImagePickerControllerReferenceURL] as? NSURL {
             let fetchResult = PHAsset.fetchAssets(withALAssetURLs: [referenceURL as URL], options: nil)
@@ -487,6 +488,7 @@ extension ViewController : UIImagePickerControllerDelegate, UINavigationControll
                                 self.canvasView.lineColor = UIColor.white
                                 self.canvasView.lineWidth = 10
                                 self.canvasView.canDraw = true
+                                self.launchView.isHidden = true
                                 self.pressColor(self.whiteBtn)
                                 
                                 let asset:AVAsset = AVAsset(url:self.videoUrl) // these should be sitting locally
