@@ -12,6 +12,7 @@ import Photos
 
 class CanvasViewController: UIViewController {
 
+    @IBOutlet var siblingSketchView: UIImageView!
     @IBOutlet var launchView: UIView!
     @IBOutlet weak var canvasView: CanvasView!
     @IBOutlet var spinner: UIActivityIndicatorView!
@@ -147,6 +148,15 @@ class CanvasViewController: UIViewController {
                 let decoded  = UserDefaults.standard.object(forKey: "sketches") as! Data?
                 if (decoded != nil) {
                     self.sketches = NSKeyedUnarchiver.unarchiveObject(with: decoded!) as! [[CALayer]?]?
+                    
+                    UIGraphicsBeginImageContextWithOptions(self.canvasView.frame.size, false, 0)
+                    if (self.sketches[1] != nil) {
+                        for sketch in self.sketches[1]! {
+                            sketch.render(in: UIGraphicsGetCurrentContext()!)
+                        }
+                    }
+                    self.siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
+                    UIGraphicsEndImageContext();
                 }
             }
         }
@@ -161,6 +171,16 @@ class CanvasViewController: UIViewController {
     @IBAction func nextFrame(_ sender: Any) {
         if (frames != nil && currentFrame < frames.count - 1) {
             clearCanvas(self)
+            
+            UIGraphicsBeginImageContextWithOptions(self.canvasView.frame.size, false, 0)
+            if (sketches[currentFrame] != nil) {
+                for sketch in sketches[currentFrame]! {
+                    sketch.render(in: UIGraphicsGetCurrentContext()!)
+                }
+            }
+            siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext();
+            
             getFrames(aroundIndex: currentFrame + 1)
             showFrame(currentFrame + 1)
         }
@@ -169,6 +189,16 @@ class CanvasViewController: UIViewController {
     @IBAction func prevFrame(_ sender: Any) {
         if (frames != nil && currentFrame > 0) {
             clearCanvas(self)
+
+            UIGraphicsBeginImageContextWithOptions(self.canvasView.frame.size, false, 0)
+            if (sketches[currentFrame] != nil) {
+                for sketch in sketches[currentFrame]! {
+                    sketch.render(in: UIGraphicsGetCurrentContext()!)
+                }
+            }
+            siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext();
+
             getFrames(aroundIndex: currentFrame - 1)
             showFrame(currentFrame - 1)
         }
@@ -459,6 +489,7 @@ class CanvasViewController: UIViewController {
     }
     
     func initVideo() {
+        clearCanvas(self)
         self.canvasView.lineColor = UIColor.white
         self.canvasView.lineWidth = 10
         self.canvasView.canDraw = true
