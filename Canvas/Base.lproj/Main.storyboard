@@ -89,6 +89,7 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
+                                    <action selector="sliderChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="LPj-xf-XTo"/>
                                     <action selector="sliderDown:" destination="BYZ-38-t0r" eventType="touchDown" id="EQK-q5-Ybz"/>
                                     <action selector="sliderUp:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="HSt-cz-tAp"/>
                                     <action selector="sliderUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="IhS-DS-YBh"/>
@@ -270,17 +271,29 @@
                     <connections>
                         <outlet property="bgView" destination="fQM-am-ArR" id="obi-vS-bPX"/>
                         <outlet property="blackBtn" destination="rfb-mK-sEv" id="18j-Ws-QKs"/>
+                        <outlet property="blackBtnHeight" destination="OJ1-HO-Zlu" id="Fmg-6o-KyH"/>
+                        <outlet property="blackBtnWidth" destination="QNF-5M-5IO" id="FY9-jS-K7H"/>
+                        <outlet property="blackBtnX" destination="1LC-ox-0mt" id="xpP-JC-PLS"/>
                         <outlet property="blueBtn" destination="1L3-9K-eN1" id="G2h-xL-mzL"/>
+                        <outlet property="blueBtnHeight" destination="jDh-Lq-pUk" id="zxR-ZM-nDq"/>
+                        <outlet property="blueBtnWidth" destination="ne8-vS-hYI" id="Bfw-Up-VgX"/>
+                        <outlet property="blueBtnX" destination="FPL-K5-r2t" id="NFc-xq-pWG"/>
                         <outlet property="canvasView" destination="WHu-me-eer" id="CAq-Dp-V5y"/>
                         <outlet property="eraseBtn" destination="JIa-YS-Nkg" id="1j3-2C-QsB"/>
                         <outlet property="launchView" destination="qqz-6I-auW" id="GLZ-mF-PvR"/>
                         <outlet property="pinkBtn" destination="BPH-3K-OJq" id="x7k-Cn-Mep"/>
+                        <outlet property="pinkBtnHeight" destination="y7b-B2-iIg" id="BYF-oH-IDD"/>
+                        <outlet property="pinkBtnWidth" destination="fG8-Ze-OS5" id="gmK-4g-DYU"/>
+                        <outlet property="pinkBtnX" destination="3hr-FO-Gsq" id="lH3-dU-mPZ"/>
                         <outlet property="progress" destination="6ZO-71-svU" id="KEk-XN-Pbq"/>
                         <outlet property="siblingSketchView" destination="IGW-eU-U8g" id="Brc-Ht-uCl"/>
                         <outlet property="sliderConstraint" destination="wY3-Y1-8Z7" id="0VD-SD-rbh"/>
                         <outlet property="spinner" destination="pRv-ne-mcw" id="QMa-Pr-kfq"/>
                         <outlet property="triangleConstraint" destination="ZFx-Xi-XPa" id="8c6-nE-eoo"/>
                         <outlet property="whiteBtn" destination="b0f-PA-yr3" id="Rny-Sj-O0L"/>
+                        <outlet property="whiteBtnHeight" destination="2Hw-XC-VVY" id="ssq-Pa-eFl"/>
+                        <outlet property="whiteBtnWidth" destination="nRi-UW-eSB" id="Y1k-Mw-uEi"/>
+                        <outlet property="whiteBtnX" destination="Hi0-eO-iSW" id="7rk-3x-ofh"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

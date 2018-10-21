@@ -28,49 +28,87 @@ class CanvasViewController: UIViewController {
     let pink:UIColor = UIColor(red: 0.9922, green: 0.9297, blue: 0.9375, alpha: 1)
     let blue:UIColor = UIColor(red: 0.8828, green: 0.9609, blue: 0.9570, alpha: 1)
     
+    @IBOutlet var whiteBtnHeight: NSLayoutConstraint!
+    @IBOutlet var whiteBtnWidth: NSLayoutConstraint!
+    @IBOutlet var whiteBtnX: NSLayoutConstraint!
+    @IBOutlet var blackBtnHeight: NSLayoutConstraint!
+    @IBOutlet var blackBtnWidth: NSLayoutConstraint!
+    @IBOutlet var blackBtnX: NSLayoutConstraint!
+    @IBOutlet var pinkBtnHeight: NSLayoutConstraint!
+    @IBOutlet var pinkBtnWidth: NSLayoutConstraint!
+    @IBOutlet var pinkBtnX: NSLayoutConstraint!
+    @IBOutlet var blueBtnHeight: NSLayoutConstraint!
+    @IBOutlet var blueBtnWidth: NSLayoutConstraint!
+    @IBOutlet var blueBtnX: NSLayoutConstraint!
+    
+    
     @IBAction func sliderDown(_ sender: Any) {
         triangleConstraint.constant = 15
         sliderConstraint.constant = -120
+        UIView.animate(withDuration: 0.25) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     @IBAction func sliderUp(_ sender: UISlider) {
         triangleConstraint.constant = -15
         sliderConstraint.constant = -150
         canvasView.lineWidth = CGFloat(sender.value)
+        UIView.animate(withDuration: 0.25) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @IBAction func sliderChanged(_ sender: UISlider) {
+        if (!sliderMaxed && (sender.value == sender.maximumValue || sender.value == sender.minimumValue)) {
+            sliderMaxed = true
+            self.hapticAlert()
+        } else if (sender.value != sender.maximumValue && sender.value != sender.minimumValue) {
+            sliderMaxed = false
+        }
     }
     
     @IBAction func pressColor(_ sender: UIButton) {
-        switch canvasView.lineColor {
-        case UIColor.white:
-            whiteBtn.frame = CGRect(x: whiteBtn.frame.origin.x + 5, y:  whiteBtn.frame.origin.y + 5, width: 30, height: 30)
-            break
-        case UIColor.black:
-            blackBtn.frame = CGRect(x: blackBtn.frame.origin.x + 5, y:  blackBtn.frame.origin.y + 5, width: 30, height: 30)
-            break
-        case pink:
-            pinkBtn.frame = CGRect(x: pinkBtn.frame.origin.x + 5, y:  pinkBtn.frame.origin.y + 5, width: 30, height: 30)
-            break
-        default:
-            blueBtn.frame = CGRect(x: blueBtn.frame.origin.x + 5, y:  blueBtn.frame.origin.y + 5, width: 30, height: 30)
-            break
-        }
+        
+        self.hapticAlert()
+        
+        whiteBtnX.constant = 10
+        whiteBtnWidth.constant = 30
+        whiteBtnHeight.constant = 30
+        blackBtnX.constant = 10
+        blackBtnWidth.constant = 30
+        blackBtnHeight.constant = 30
+        pinkBtnX.constant = 10
+        pinkBtnWidth.constant = 30
+        pinkBtnHeight.constant = 30
+        blueBtnX.constant = 10
+        blueBtnWidth.constant = 30
+        blueBtnHeight.constant = 30
         
         switch sender {
         case whiteBtn:
             canvasView.lineColor = UIColor.white
-            whiteBtn.frame = CGRect(x: whiteBtn.frame.origin.x - 5, y:  whiteBtn.frame.origin.y - 5, width: 40, height: 40)
+            whiteBtnX.constant = 5
+            whiteBtnWidth.constant = 40
+            whiteBtnHeight.constant = 40
             break
         case blackBtn:
             canvasView.lineColor = UIColor.black
-            blackBtn.frame = CGRect(x: blackBtn.frame.origin.x - 5, y:  blackBtn.frame.origin.y - 5, width: 40, height: 40)
+            blackBtnX.constant = 5
+            blackBtnWidth.constant = 40
+            blackBtnHeight.constant = 40
             break
         case pinkBtn:
             canvasView.lineColor = pink
-            pinkBtn.frame = CGRect(x: pinkBtn.frame.origin.x - 5, y:  pinkBtn.frame.origin.y - 5, width: 40, height: 40)
+            pinkBtnX.constant = 5
+            pinkBtnWidth.constant = 40
+            pinkBtnHeight.constant = 40
             break
         default:
             canvasView.lineColor = blue
-            blueBtn.frame = CGRect(x: blueBtn.frame.origin.x - 5, y:  blueBtn.frame.origin.y - 5, width: 40, height: 40)
+            blueBtnX.constant = 5
+            blueBtnWidth.constant = 40
+            blueBtnHeight.constant = 40
             break
         }
     }
@@ -83,6 +121,8 @@ class CanvasViewController: UIViewController {
     private var generator:AVAssetImageGenerator!
     var currentFrame:Int!
     var imagePicker = UIImagePickerController()
+    let lightImpactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+    var sliderMaxed:Bool = false
     
     func getFrames(aroundIndex: Int) {
         var times:[CMTime] = []
@@ -139,6 +179,7 @@ class CanvasViewController: UIViewController {
     }
     
     override func viewDidLoad() {
+        lightImpactFeedbackGenerator.prepare()
         spinner.startAnimating()
         imagePicker.delegate = self
         self.videoUrl = UserDefaults.standard.url(forKey: "videoUrl")
@@ -502,6 +543,25 @@ class CanvasViewController: UIViewController {
         self.sketches = [[CALayer]?](repeating: nil, count: maxIndex)
         self.getFrames(aroundIndex: 0)
         self.showFrame(0)
+    }
+    
+    func hapticAlert() {
+        // Play haptic signal
+        if let feedbackSupportLevel = UIDevice.current.value(forKey: "_feedbackSupportLevel") as? Int {
+            switch feedbackSupportLevel {
+            case 2:
+                // 2nd Generation Taptic Engine w/ Haptic Feedback (iPhone 7/7+)
+                lightImpactFeedbackGenerator.impactOccurred()
+            case 1:
+                // 1st Generation Taptic Engine (iPhone 6S/6S+)
+                let peek = SystemSoundID(1519)
+                AudioServicesPlaySystemSound(peek)
+            case 0:
+                // No Taptic Engine
+                break
+            default: break
+            }
+        }
     }
 }
 
