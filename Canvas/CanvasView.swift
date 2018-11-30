@@ -32,6 +32,12 @@ class CanvasView: UIView {
         startingPoint = touch?.location(in: self)
     }
     
+    func distance(from lhs: CGPoint, to rhs: CGPoint) -> CGFloat {
+        let xDistance = lhs.x - rhs.x
+        let yDistance = lhs.y - rhs.y
+        return sqrt(xDistance * xDistance + yDistance * yDistance)
+    }
+    
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if (canDraw) {
             // get the next touch point as the user draws
@@ -42,16 +48,19 @@ class CanvasView: UIView {
             path = UIBezierPath()
             path.move(to: startingPoint)
             path.addLine(to: touchPoint)
+            
+            let dist = distance(from: startingPoint, to: touchPoint);
+            NSLog("%f", dist);
         
             // setting the startingPoint to the previous touchpoint
             // this updates while the user draws
             startingPoint = touchPoint
         
-            drawShapeLayer() // draws the actual line shapes
+            drawShapeLayer(withSpeed: dist) // draws the actual line shapes
         }
     }
     
-    func drawShapeLayer() {
+    func drawShapeLayer(withSpeed speed: CGFloat) {
         
         let shapeLayer = CAShapeLayer()
         // the shape layer is used to draw along the already created path
@@ -59,7 +68,7 @@ class CanvasView: UIView {
         
         // adjusting the shape to our wishes
         shapeLayer.strokeColor = lineColor.cgColor
-        shapeLayer.lineWidth = lineWidth
+        shapeLayer.lineWidth = min(lineWidth*(log(speed)*(-0.15) + 1.0), lineWidth); //increase the -0.15 to make the line smaller at faster speeds
         shapeLayer.lineCap = kCALineCapRound
         shapeLayer.fillColor = UIColor.clear.cgColor
         

@@ -55,7 +55,9 @@
                                 </constraints>
                                 <state key="normal" image="right"/>
                                 <connections>
-                                    <action selector="nextFrame:" destination="BYZ-38-t0r" eventType="touchUpInside" id="P60-rh-deJ"/>
+                                    <action selector="nextDown:" destination="BYZ-38-t0r" eventType="touchDown" id="veE-A1-lvV"/>
+                                    <action selector="nextUp:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="Dvw-Hu-uqV"/>
+                                    <action selector="nextUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zlw-aM-0pp"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Rm-ZY-4Zr">
@@ -66,7 +68,9 @@
                                 </constraints>
                                 <state key="normal" image="left"/>
                                 <connections>
-                                    <action selector="prevFrame:" destination="BYZ-38-t0r" eventType="touchUpInside" id="jSz-ss-iRa"/>
+                                    <action selector="prevDown:" destination="BYZ-38-t0r" eventType="touchDown" id="cUh-YB-ShE"/>
+                                    <action selector="prevUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Hhr-bp-olT"/>
+                                    <action selector="prevUp:" destination="BYZ-38-t0r" eventType="touchUpOutside" id="u4v-WX-SMp"/>
                                 </connections>
                             </button>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="triangle" translatesAutoresizingMaskIntoConstraints="NO" id="z96-CA-fjn">

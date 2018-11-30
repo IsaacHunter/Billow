@@ -123,6 +123,8 @@ class CanvasViewController: UIViewController {
     var imagePicker = UIImagePickerController()
     let lightImpactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     var sliderMaxed:Bool = false
+    var nextTimer: Timer?
+    var prevTimer: Timer?
     
     func getFrames(aroundIndex: Int) {
         var times:[CMTime] = []
@@ -209,7 +211,16 @@ class CanvasViewController: UIViewController {
         }
     }
     
-    @IBAction func nextFrame(_ sender: Any) {
+    @IBAction func nextDown(_ sender: Any) {
+        nextFrame()
+        nextTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(nextFrame), userInfo: nil, repeats: true)
+    }
+    
+    @IBAction func nextUp(_ sender: Any) {
+        nextTimer?.invalidate()
+    }
+    
+    @objc func nextFrame() {
         if (frames != nil && currentFrame < frames.count - 1) {
             clearCanvas(self)
             
@@ -224,10 +235,21 @@ class CanvasViewController: UIViewController {
             
             getFrames(aroundIndex: currentFrame + 1)
             showFrame(currentFrame + 1)
+        } else {
+            nextTimer?.invalidate()
         }
     }
     
-    @IBAction func prevFrame(_ sender: Any) {
+    @IBAction func prevDown(_ sender: Any) {
+        prevFrame()
+        prevTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(prevFrame), userInfo: nil, repeats: true)
+    }
+    
+    @IBAction func prevUp(_ sender: Any) {
+        prevTimer?.invalidate()
+    }
+    
+    @objc func prevFrame() {
         if (frames != nil && currentFrame > 0) {
             clearCanvas(self)
 
@@ -242,10 +264,47 @@ class CanvasViewController: UIViewController {
 
             getFrames(aroundIndex: currentFrame - 1)
             showFrame(currentFrame - 1)
+        } else {
+            prevTimer?.invalidate()
         }
     }
     
     func showFrame(_ i:Int) {
+        if (frames[i] != nil) {
+            let size:CGSize = frames[i]!.size
+            let orientation:UIImageOrientation = frames[i]!.imageOrientation
+            
+            switch UIDevice.current.orientation{
+            case .landscapeLeft:
+                if (size.height > size.width) {
+                    switch orientation{
+                    case UIImageOrientation.up, UIImageOrientation.down:
+                        frames[i] = UIImage(cgImage: frames[i]!.cgImage!, scale: 1.0, orientation: UIImageOrientation.left)
+                    default:
+                        frames[i] = UIImage(cgImage: frames[i]!.cgImage!, scale: 1.0, orientation: UIImageOrientation.up)
+                    }
+                }
+            case .landscapeRight:
+                if (size.height > size.width) {
+                    switch orientation{
+                    case UIImageOrientation.up, UIImageOrientation.down:
+                        frames[i] = UIImage(cgImage: frames[i]!.cgImage!, scale: 1.0, orientation: UIImageOrientation.right)
+                    default:
+                        frames[i] = UIImage(cgImage: frames[i]!.cgImage!, scale: 1.0, orientation: UIImageOrientation.up)
+                    }
+                }
+            default:
+                if (size.width > size.height) {
+                    switch orientation{
+                    case UIImageOrientation.up, UIImageOrientation.down:
+                        frames[i] = UIImage(cgImage: frames[i]!.cgImage!, scale: 1.0, orientation: UIImageOrientation.right)
+                    default:
+                        frames[i] = UIImage(cgImage: frames[i]!.cgImage!, scale: 1.0, orientation: UIImageOrientation.up)
+                    }
+                }
+            }
+        }
+        
         bgView.image = frames[i]
         if (sketches[i] != nil) {
             for sketch in sketches[i]! {
@@ -274,10 +333,19 @@ class CanvasViewController: UIViewController {
         } catch {
             print(error)
         }
-        self.writeImagesAsMovie(videoPath: videoOutputUrl, videoSize: self.canvasView.frame.size, videoFPS: 30)
+        
+        var videoSize:CGSize = self.canvasView.frame.size
+        var orientation:UIImageOrientation = UIImageOrientation.up
+        if (frames[currentFrame] != nil) {
+            orientation = frames[currentFrame]!.imageOrientation
+//            if (orientation == UIImageOrientation.left || orientation == UIImageOrientation.right) {
+//                videoSize = CGSize(width: videoSize.height, height: videoSize.width)
+//            }
+        }
+        self.writeImagesAsMovie(videoPath: videoOutputUrl, videoSize: videoSize, videoFPS: 30, orientation: orientation)
     }
     
-    func writeImagesAsMovie(videoPath: URL, videoSize: CGSize, videoFPS: Int32) {
+    func writeImagesAsMovie(videoPath: URL, videoSize: CGSize, videoFPS: Int32, orientation: UIImageOrientation) {
         self.generator = AVAssetImageGenerator(asset:asset)
         self.generator.appliesPreferredTrackTransform = true
         self.generator.requestedTimeToleranceBefore = kCMTimeZero
@@ -338,7 +406,7 @@ class CanvasViewController: UIViewController {
                     
                     UIGraphicsBeginImageContextWithOptions(videoSize, false, 0)
                     let areaSize = CGRect(x: 0, y: 0, width: videoSize.width, height: videoSize.height)
-                    UIImage(cgImage: image!).draw(in: areaSize)
+                    UIImage(cgImage: image!, scale:1.0, orientation:orientation).draw(in: areaSize)
                     let j = Int(floor(Double(frameCount)/3.0)) // need to change if we're doing something other than 30 + 10
                     if (j < self.sketches.count && self.sketches[j] != nil) {
                         for sketch in self.sketches[j]! {
@@ -562,6 +630,17 @@ class CanvasViewController: UIViewController {
             default: break
             }
         }
+    }
+    
+    override var prefersStatusBarHidden: Bool { return true }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        coordinator.animate(alongsideTransition: nil) { (_) in
+            UIView.setAnimationsEnabled(true)
+        }
+        UIView.setAnimationsEnabled(false)
+        super.viewWillTransition(to: size, with: coordinator)
+        showFrame(currentFrame)
     }
 }
 
