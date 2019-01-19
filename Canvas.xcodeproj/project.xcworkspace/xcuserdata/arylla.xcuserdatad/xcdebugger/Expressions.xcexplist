@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "CanvasView.undo():CanvasView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.history">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in closure #2 in ViewController.writeImagesAsMovie(allImages:videoPath:videoSize:videoFPS:):ViewController.swift">
          <PersistentStrings>
             <PersistentString
@@ -14,7 +22,36 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "CanvasViewController.initVideo():CanvasViewController.swift">
+         contextName = "CanvasViewController.sliderUp(_:):CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "sender.value">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in closure #2 in CanvasViewController.writeImagesAsMovie(videoPath:videoSize:videoFPS:orientation:):CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "sketch.contentsGravity">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "CanvasView.drawShapeLayer(withSpeed:):CanvasView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "shapeLayer.lineWidth">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in CanvasViewController.viewDidLoad():CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.asset.tracks.count">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "CanvasViewController.getFrames(aroundIndex:):CanvasViewController.swift">
@@ -25,10 +62,21 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "CanvasView.drawShapeLayer(withSpeed:):CanvasView.swift">
+         contextName = "CanvasView.touchesEnded(_:with:):CanvasView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "shapeLayer.lineWidth">
+               value = "self.historyIndex">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "CanvasViewController.getTimelineThumbs():CanvasViewController.swift">
+      </ContextState>
+      <ContextState
+         contextName = "CanvasViewController.initVideo():CanvasViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.frames">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

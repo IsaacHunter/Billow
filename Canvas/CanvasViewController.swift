@@ -22,25 +22,18 @@ class CanvasViewController: UIViewController {
     @IBOutlet var progress: UIProgressView!
     @IBOutlet var whiteBtn: UIButton!
     @IBOutlet var blackBtn: UIButton!
-    @IBOutlet var pinkBtn: UIButton!
-    @IBOutlet var blueBtn: UIButton!
+    @IBOutlet var redBtn: UIButton!
+    @IBOutlet var greenBtn: UIButton!
+    @IBOutlet var goldBtn: UIButton!
     @IBOutlet var eraseBtn: UIButton!
-    let pink:UIColor = UIColor(red: 0.9922, green: 0.9297, blue: 0.9375, alpha: 1)
-    let blue:UIColor = UIColor(red: 0.8828, green: 0.9609, blue: 0.9570, alpha: 1)
+    let red:UIColor = UIColor(red: 0.6588, green: 0.0667, blue: 0.0667, alpha: 1)
+    let green:UIColor = UIColor(red: 0.0549, green: 0.4588, blue: 0.0549, alpha: 1)
+    let gold:UIColor = UIColor(red: 0.9098, green: 0.7294, blue: 0.2117, alpha: 1)
     
-    @IBOutlet var whiteBtnHeight: NSLayoutConstraint!
-    @IBOutlet var whiteBtnWidth: NSLayoutConstraint!
-    @IBOutlet var whiteBtnX: NSLayoutConstraint!
-    @IBOutlet var blackBtnHeight: NSLayoutConstraint!
-    @IBOutlet var blackBtnWidth: NSLayoutConstraint!
-    @IBOutlet var blackBtnX: NSLayoutConstraint!
-    @IBOutlet var pinkBtnHeight: NSLayoutConstraint!
-    @IBOutlet var pinkBtnWidth: NSLayoutConstraint!
-    @IBOutlet var pinkBtnX: NSLayoutConstraint!
-    @IBOutlet var blueBtnHeight: NSLayoutConstraint!
-    @IBOutlet var blueBtnWidth: NSLayoutConstraint!
-    @IBOutlet var blueBtnX: NSLayoutConstraint!
-    
+    @IBOutlet var colorsViewConstraint: NSLayoutConstraint!
+    @IBOutlet var colorBtnContraint: NSLayoutConstraint!
+    @IBOutlet var timelineStack: UIView!
+    @IBOutlet var timelineSliderConstraint: NSLayoutConstraint!
     
     @IBAction func sliderDown(_ sender: Any) {
         triangleConstraint.constant = 15
@@ -71,45 +64,46 @@ class CanvasViewController: UIViewController {
     @IBAction func pressColor(_ sender: UIButton) {
         
         self.hapticAlert()
-        
-        whiteBtnX.constant = 10
-        whiteBtnWidth.constant = 30
-        whiteBtnHeight.constant = 30
-        blackBtnX.constant = 10
-        blackBtnWidth.constant = 30
-        blackBtnHeight.constant = 30
-        pinkBtnX.constant = 10
-        pinkBtnWidth.constant = 30
-        pinkBtnHeight.constant = 30
-        blueBtnX.constant = 10
-        blueBtnWidth.constant = 30
-        blueBtnHeight.constant = 30
+        whiteBtn.setImage(UIImage(named:"color-white"), for: .normal)
+        blackBtn.setImage(UIImage(named:"color-black"), for: .normal)
+        redBtn.setImage(UIImage(named:"color-red"), for: .normal)
+        greenBtn.setImage(UIImage(named:"color-green"), for: .normal)
+        goldBtn.setImage(UIImage(named:"color-gold"), for: .normal)
         
         switch sender {
         case whiteBtn:
             canvasView.lineColor = UIColor.white
-            whiteBtnX.constant = 5
-            whiteBtnWidth.constant = 40
-            whiteBtnHeight.constant = 40
+            sender.setImage(UIImage(named:"color-white-selected"), for: .normal)
             break
         case blackBtn:
             canvasView.lineColor = UIColor.black
-            blackBtnX.constant = 5
-            blackBtnWidth.constant = 40
-            blackBtnHeight.constant = 40
+            sender.setImage(UIImage(named:"color-black-selected"), for: .normal)
             break
-        case pinkBtn:
-            canvasView.lineColor = pink
-            pinkBtnX.constant = 5
-            pinkBtnWidth.constant = 40
-            pinkBtnHeight.constant = 40
+        case redBtn:
+            canvasView.lineColor = red
+            sender.setImage(UIImage(named:"color-red-selected"), for: .normal)
+            break
+        case greenBtn:
+            canvasView.lineColor = green
+            sender.setImage(UIImage(named:"color-green-selected"), for: .normal)
             break
         default:
-            canvasView.lineColor = blue
-            blueBtnX.constant = 5
-            blueBtnWidth.constant = 40
-            blueBtnHeight.constant = 40
+            canvasView.lineColor = gold
+            sender.setImage(UIImage(named:"color-gold-selected"), for: .normal)
             break
+        }
+    }
+    
+    @IBAction func pressColorBtn(_ sender: UIButton) {
+        if (colorsViewConstraint.constant == 0) {
+            colorsViewConstraint.constant = -230;
+            colorBtnContraint.constant = 325;
+        } else {
+            colorsViewConstraint.constant = 0;
+            colorBtnContraint.constant = 20;
+        }
+        UIView.animate(withDuration: 0.25) {
+            self.view.layoutIfNeeded()
         }
     }
     
@@ -120,11 +114,44 @@ class CanvasViewController: UIViewController {
     var sketches:[[CALayer]?]!
     private var generator:AVAssetImageGenerator!
     var currentFrame:Int!
+    var lastFrame:Int!
     var imagePicker = UIImagePickerController()
     let lightImpactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
     var sliderMaxed:Bool = false
     var nextTimer: Timer?
     var prevTimer: Timer?
+    
+    func getTimelineThumbs() {
+        var times:[CMTime] = []
+        let track = asset.tracks(withMediaType: AVMediaType.video).first
+        if (track != nil) {
+            let size = track!.naturalSize.applying(track!.preferredTransform)
+            
+            let numThumbs = self.timelineStack.frame.width/(abs(size.width)*self.timelineStack.frame.height/abs(size.height));
+            
+            for i:Int in 0 ..< Int(ceil(numThumbs)) {
+                let time:CMTime = CMTimeMakeWithSeconds(Float64(i)*duration/Float64(ceil(numThumbs)), 600);
+                times.append(time)
+            }
+            
+            self.generator = AVAssetImageGenerator(asset:asset) // possibly be sitting locally and just be refreshed when importing new footage
+            self.generator.appliesPreferredTrackTransform = true
+            self.generator.requestedTimeToleranceBefore = kCMTimeZero
+            self.generator.requestedTimeToleranceAfter = kCMTimeZero
+            
+            self.generator.generateCGImagesAsynchronously(forTimes: times as [NSValue]) { (requestedTime, image, actualTime, result, error) in
+                DispatchQueue.main.async {
+                    let loc = times.firstIndex(of: requestedTime)
+                    let image =  UIImage(cgImage: image!)
+                    let imageView = UIImageView(image: image)
+                    let width = Int(abs(size.width)*self.timelineStack.frame.height/abs(size.height))
+                    let height = Int(self.timelineStack.frame.height)
+                    imageView.frame = CGRect(x: loc!*width, y: 0, width: width, height: height)
+                    self.timelineStack.addSubview(imageView)
+                }
+            }
+        }
+    }
     
     func getFrames(aroundIndex: Int) {
         var times:[CMTime] = []
@@ -185,7 +212,8 @@ class CanvasViewController: UIViewController {
         spinner.startAnimating()
         imagePicker.delegate = self
         self.videoUrl = UserDefaults.standard.url(forKey: "videoUrl")
-        if (self.videoUrl != nil) {
+        self.asset = AVAsset(url:self.videoUrl)
+        if (self.videoUrl != nil && self.asset.tracks.count > 0) {
             DispatchQueue.main.async {
                 self.initVideo()
                 let decoded  = UserDefaults.standard.object(forKey: "sketches") as! Data?
@@ -202,6 +230,8 @@ class CanvasViewController: UIViewController {
                     UIGraphicsEndImageContext();
                 }
             }
+        } else {
+            launchView.isHidden = false
         }
     }
 
@@ -233,6 +263,7 @@ class CanvasViewController: UIViewController {
             siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext();
             
+            lastFrame = currentFrame
             getFrames(aroundIndex: currentFrame + 1)
             showFrame(currentFrame + 1)
         } else {
@@ -262,6 +293,7 @@ class CanvasViewController: UIViewController {
             siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext();
 
+            lastFrame = currentFrame
             getFrames(aroundIndex: currentFrame - 1)
             showFrame(currentFrame - 1)
         } else {
@@ -318,6 +350,17 @@ class CanvasViewController: UIViewController {
             userDefaults.set(encodedData, forKey: "sketches")
             userDefaults.synchronize()
         }
+        let width = Int(self.timelineStack.frame.width)
+        let newSliderConstant = currentFrame*(width-2)/frames.count+5
+        self.timelineSliderConstraint.constant = CGFloat(newSliderConstant)
+    }
+    
+    @IBAction func duplicateFrame(_ sender: UIButton) {
+        if (lastFrame > -1 && sketches[lastFrame] != nil) {
+            for sketch in sketches[lastFrame]! {
+                canvasView.layer.addSublayer(sketch)
+            }
+        }
     }
     
     @IBAction func export(_ sender: Any) {
@@ -334,7 +377,8 @@ class CanvasViewController: UIViewController {
             print(error)
         }
         
-        var videoSize:CGSize = self.canvasView.frame.size
+//        var videoSize:CGSize = self.canvasView.frame.size
+        let videoSize:CGSize = CGSize(width: 750, height: 1334)
         var orientation:UIImageOrientation = UIImageOrientation.up
         if (frames[currentFrame] != nil) {
             orientation = frames[currentFrame]!.imageOrientation
@@ -404,16 +448,23 @@ class CanvasViewController: UIViewController {
                         return
                     }
                     
-                    UIGraphicsBeginImageContextWithOptions(videoSize, false, 0)
-                    let areaSize = CGRect(x: 0, y: 0, width: videoSize.width, height: videoSize.height)
-                    UIImage(cgImage: image!, scale:1.0, orientation:orientation).draw(in: areaSize)
+                    UIGraphicsBeginImageContextWithOptions(CGSize(width: 375, height: 667), false, 0)
+//                    let areaSize = CGRect(x: 0, y: 0, width: videoSize.width, height: videoSize.height)
+//                    UIImage(cgImage: image!, scale:1.0, orientation:orientation).draw(in: areaSize)
                     let j = Int(floor(Double(frameCount)/3.0)) // need to change if we're doing something other than 30 + 10
                     if (j < self.sketches.count && self.sketches[j] != nil) {
+//                        let transformFloat = 2.87856071964018
                         for sketch in self.sketches[j]! {
                             sketch.render(in: UIGraphicsGetCurrentContext()!)
                         }
                     }
-                    let videoFrame:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+                    var videoFrame:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+                    
+                    UIGraphicsBeginImageContextWithOptions(videoSize, false, 0)
+                    let areaSize = CGRect(x: 0, y: 0, width: videoSize.width, height: videoSize.height)
+                    UIImage(cgImage: image!, scale:1.0, orientation:orientation).draw(in: areaSize)
+                    videoFrame.draw(in:areaSize)
+                    videoFrame = UIGraphicsGetImageFromCurrentImageContext()!
                     
                     let lastFrameTime = CMTimeMake(Int64(frameCount), videoFPS)
                     let presentationTime = frameCount == 0 ? lastFrameTime : CMTimeAdd(lastFrameTime, frameDuration)
@@ -592,6 +643,10 @@ class CanvasViewController: UIViewController {
         present(imagePicker, animated: true, completion: nil)
     }
     
+    @IBAction func undo(_ sender: Any) {
+        self.canvasView.undo()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -599,17 +654,19 @@ class CanvasViewController: UIViewController {
     
     func initVideo() {
         clearCanvas(self)
+        self.canvasView.initHistory()
         self.canvasView.lineColor = UIColor.white
         self.canvasView.lineWidth = 10
         self.canvasView.canDraw = true
         self.launchView.isHidden = true
         self.pressColor(self.whiteBtn)
-        self.asset = AVAsset(url:self.videoUrl)
         self.duration = CMTimeGetSeconds(self.asset.duration)
         let maxIndex:Int = Int(self.duration*10)
         self.frames = [UIImage?](repeating: nil, count: maxIndex)
         self.sketches = [[CALayer]?](repeating: nil, count: maxIndex)
+        self.getTimelineThumbs()
         self.getFrames(aroundIndex: 0)
+        lastFrame = -1;
         self.showFrame(0)
     }
     
@@ -664,8 +721,13 @@ extension CanvasViewController : UIImagePickerControllerDelegate, UINavigationCo
                         
                             print("success")
                             DispatchQueue.main.async {
-                                self.initVideo()
-                                self.dismiss(animated: true, completion: nil)
+                                self.asset = AVAsset(url:self.videoUrl)
+                                if (self.videoUrl != nil && self.asset.tracks.count > 0) {
+                                    self.initVideo()
+                                    self.dismiss(animated: true, completion: nil)
+                                } else {
+                                    self.launchView.isHidden = false
+                                }
                             }
                     }
                 })
