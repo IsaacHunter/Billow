@@ -19,6 +19,10 @@ class CanvasView: UIView {
     var canDraw:Bool=false
     var history:[[CALayer]?]!
     var historyIndex:Int = 0
+    var erase:Bool=false
+    var otherLayer:CALayer=CALayer()
+    
+    private let filter = ChromaKeyFilter()
     
     override func layoutSubviews() {
         self.clipsToBounds = true // no lines should be visible outside of the view
@@ -43,7 +47,7 @@ class CanvasView: UIView {
             }
             historyIndex = historyIndex - 1
         }
-        history[historyIndex] = self.layer.sublayers
+        history[historyIndex] = otherLayer.sublayers
         historyIndex=historyIndex+1
         NSLog("ended")
     }
@@ -88,20 +92,19 @@ class CanvasView: UIView {
         shapeLayer.fillColor = UIColor.clear.cgColor
         
         // adding the shapelayer to the vies layer and forcing a redraw
-        self.layer.addSublayer(shapeLayer)
-        self.setNeedsDisplay()
-        
+        otherLayer.addSublayer(shapeLayer)
+        self.reloadView()
     }
     
     func clearCanvas() -> [CALayer]? {
         initHistory()
-        let tempLayers = self.layer.sublayers
+        let tempLayers = otherLayer.sublayers
         
         if (path != nil) {
             path.removeAllPoints()
         }
-        self.layer.sublayers = nil
-        self.setNeedsDisplay()
+        otherLayer.sublayers = nil
+        self.reloadView()
         return tempLayers
     }
     
@@ -115,18 +118,33 @@ class CanvasView: UIView {
             if (path != nil) {
                 path.removeAllPoints()
             }
-            self.layer.sublayers = nil
-            self.setNeedsDisplay()
+            otherLayer.sublayers = nil
             historyIndex=historyIndex-1
         }
         if (historyIndex > 0 && history[historyIndex-1] != nil) {
             for shape:CALayer in history[historyIndex-1]! {
-                self.layer.addSublayer(shape)
+                otherLayer.addSublayer(shape)
             }
             history[historyIndex] = nil
         }
+        self.reloadView()
     }
     
+    func reloadView() {
+        UIGraphicsBeginImageContextWithOptions(self.frame.size, false, 0)
+        otherLayer.render(in:  UIGraphicsGetCurrentContext()!)
+        let temp = UIGraphicsGetImageFromCurrentImageContext()
+        if ((temp) != nil) {
+            filter.inputImage = CIImage(image: temp!)!
+            
+            let context = CIContext(options: nil)
+            if let cgImage = context.createCGImage(filter.outputImage, from: filter.outputImage.extent) {
+                self.layer.contents = cgImage;
+                self.setNeedsDisplay()
+            }
+        }
+        UIGraphicsEndImageContext();
+    }
     
     /*
     // Only override draw() if you perform custom drawing.

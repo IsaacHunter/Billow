@@ -26,14 +26,20 @@ class CanvasViewController: UIViewController {
     @IBOutlet var greenBtn: UIButton!
     @IBOutlet var goldBtn: UIButton!
     @IBOutlet var eraseBtn: UIButton!
+    @IBOutlet var colorBtn: UIButton!
     let red:UIColor = UIColor(red: 0.6588, green: 0.0667, blue: 0.0667, alpha: 1)
     let green:UIColor = UIColor(red: 0.0549, green: 0.4588, blue: 0.0549, alpha: 1)
     let gold:UIColor = UIColor(red: 0.9098, green: 0.7294, blue: 0.2117, alpha: 1)
+    let eraser:UIColor = UIColor(red: 0.549019608, green: 0.211764706, blue: 0.909803922, alpha: 1)
+    var savedColor:UIColor = UIColor.white
+    var erase:Bool = false
     
     @IBOutlet var colorsViewConstraint: NSLayoutConstraint!
     @IBOutlet var colorBtnContraint: NSLayoutConstraint!
     @IBOutlet var timelineStack: UIView!
     @IBOutlet var timelineSliderConstraint: NSLayoutConstraint!
+    
+    private let filter = ChromaKeyFilter()
     
     @IBAction func sliderDown(_ sender: Any) {
         triangleConstraint.constant = 15
@@ -64,46 +70,66 @@ class CanvasViewController: UIViewController {
     @IBAction func pressColor(_ sender: UIButton) {
         
         self.hapticAlert()
-        whiteBtn.setImage(UIImage(named:"color-white"), for: .normal)
-        blackBtn.setImage(UIImage(named:"color-black"), for: .normal)
-        redBtn.setImage(UIImage(named:"color-red"), for: .normal)
-        greenBtn.setImage(UIImage(named:"color-green"), for: .normal)
-        goldBtn.setImage(UIImage(named:"color-gold"), for: .normal)
-        
-        switch sender {
-        case whiteBtn:
-            canvasView.lineColor = UIColor.white
-            sender.setImage(UIImage(named:"color-white-selected"), for: .normal)
-            break
-        case blackBtn:
-            canvasView.lineColor = UIColor.black
-            sender.setImage(UIImage(named:"color-black-selected"), for: .normal)
-            break
-        case redBtn:
-            canvasView.lineColor = red
-            sender.setImage(UIImage(named:"color-red-selected"), for: .normal)
-            break
-        case greenBtn:
-            canvasView.lineColor = green
-            sender.setImage(UIImage(named:"color-green-selected"), for: .normal)
-            break
-        default:
-            canvasView.lineColor = gold
-            sender.setImage(UIImage(named:"color-gold-selected"), for: .normal)
-            break
+        if (sender == eraseBtn) {
+            canvasView.lineColor = eraser
+            sender.setImage(UIImage(named:"erase-down"), for: .normal)
+            colorBtn.setImage(UIImage(named:"icon-paint"), for: .normal)
+            erase = true
+        } else {
+            whiteBtn.setImage(UIImage(named:"color-white"), for: .normal)
+            blackBtn.setImage(UIImage(named:"color-black"), for: .normal)
+            redBtn.setImage(UIImage(named:"color-red"), for: .normal)
+            greenBtn.setImage(UIImage(named:"color-green"), for: .normal)
+            goldBtn.setImage(UIImage(named:"color-gold"), for: .normal)
+            eraseBtn.setImage(UIImage(named:"erase"), for: .normal)
+            
+            switch sender {
+            case whiteBtn:
+                canvasView.lineColor = UIColor.white
+                sender.setImage(UIImage(named:"color-white-selected"), for: .normal)
+                savedColor = UIColor.white
+                break
+            case blackBtn:
+                canvasView.lineColor = UIColor.black
+                sender.setImage(UIImage(named:"color-black-selected"), for: .normal)
+                savedColor = UIColor.black
+                break
+            case redBtn:
+                canvasView.lineColor = red
+                sender.setImage(UIImage(named:"color-red-selected"), for: .normal)
+                savedColor = red
+                break
+            case greenBtn:
+                canvasView.lineColor = green
+                sender.setImage(UIImage(named:"color-green-selected"), for: .normal)
+                savedColor = green
+                break
+            default:
+                canvasView.lineColor = gold
+                sender.setImage(UIImage(named:"color-gold-selected"), for: .normal)
+                savedColor = gold
+                break
+            }
         }
     }
     
     @IBAction func pressColorBtn(_ sender: UIButton) {
-        if (colorsViewConstraint.constant == 0) {
-            colorsViewConstraint.constant = -230;
-            colorBtnContraint.constant = 325;
+        if (erase) {
+            sender.setImage(UIImage(named:"color-menu"), for: .normal)
+            eraseBtn.setImage(UIImage(named:"erase"), for: .normal)
+            erase = false
+            canvasView.lineColor = savedColor
         } else {
-            colorsViewConstraint.constant = 0;
-            colorBtnContraint.constant = 20;
-        }
-        UIView.animate(withDuration: 0.25) {
-            self.view.layoutIfNeeded()
+            if (colorsViewConstraint.constant == 0) {
+                colorsViewConstraint.constant = -230;
+                colorBtnContraint.constant = 325;
+            } else {
+                colorsViewConstraint.constant = 0;
+                colorBtnContraint.constant = 20;
+            }
+            UIView.animate(withDuration: 0.25) {
+                self.view.layoutIfNeeded()
+            }
         }
     }
     
@@ -212,23 +238,32 @@ class CanvasViewController: UIViewController {
         spinner.startAnimating()
         imagePicker.delegate = self
         self.videoUrl = UserDefaults.standard.url(forKey: "videoUrl")
-        self.asset = AVAsset(url:self.videoUrl)
-        if (self.videoUrl != nil && self.asset.tracks.count > 0) {
-            DispatchQueue.main.async {
-                self.initVideo()
-                let decoded  = UserDefaults.standard.object(forKey: "sketches") as! Data?
-                if (decoded != nil) {
-                    self.sketches = NSKeyedUnarchiver.unarchiveObject(with: decoded!) as! [[CALayer]?]?
-                    
-                    UIGraphicsBeginImageContextWithOptions(self.canvasView.frame.size, false, 0)
-                    if (self.sketches[1] != nil) {
-                        for sketch in self.sketches[1]! {
-                            sketch.render(in: UIGraphicsGetCurrentContext()!)
+        if (self.videoUrl != nil ) {
+            self.asset = AVAsset(url:self.videoUrl)
+            if (self.asset.tracks.count > 0) {
+                DispatchQueue.main.async {
+                    self.initVideo()
+                    let decoded  = UserDefaults.standard.object(forKey: "sketches") as! Data?
+                    if (decoded != nil) {
+                        self.sketches = NSKeyedUnarchiver.unarchiveObject(with: decoded!) as! [[CALayer]?]?
+                        
+                        UIGraphicsBeginImageContextWithOptions(self.canvasView.frame.size, false, 0)
+                        if (self.sketches[1] != nil) {
+                            for sketch in self.sketches[1]! {
+                                sketch.render(in: UIGraphicsGetCurrentContext()!)
+                            }
                         }
+                        
+                        let temp = UIGraphicsGetImageFromCurrentImageContext()
+                        if ((temp) != nil) {
+                            self.filter.inputImage = CIImage(image: temp!)!
+                            self.siblingSketchView.image = UIImage(ciImage: self.filter.outputImage)
+                        }
+                        UIGraphicsEndImageContext();
                     }
-                    self.siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
-                    UIGraphicsEndImageContext();
                 }
+            } else {
+                launchView.isHidden = false
             }
         } else {
             launchView.isHidden = false
@@ -260,7 +295,11 @@ class CanvasViewController: UIViewController {
                     sketch.render(in: UIGraphicsGetCurrentContext()!)
                 }
             }
-            siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
+            let temp = UIGraphicsGetImageFromCurrentImageContext()
+            if ((temp) != nil) {
+                self.filter.inputImage = CIImage(image: temp!)!
+                self.siblingSketchView.image = UIImage(ciImage: self.filter.outputImage)
+            }
             UIGraphicsEndImageContext();
             
             lastFrame = currentFrame
@@ -290,7 +329,11 @@ class CanvasViewController: UIViewController {
                     sketch.render(in: UIGraphicsGetCurrentContext()!)
                 }
             }
-            siblingSketchView.image = UIGraphicsGetImageFromCurrentImageContext()
+            let temp = UIGraphicsGetImageFromCurrentImageContext()
+            if ((temp) != nil) {
+                self.filter.inputImage = CIImage(image: temp!)!
+                self.siblingSketchView.image = UIImage(ciImage: self.filter.outputImage)
+            }
             UIGraphicsEndImageContext();
 
             lastFrame = currentFrame
@@ -340,7 +383,7 @@ class CanvasViewController: UIViewController {
         bgView.image = frames[i]
         if (sketches[i] != nil) {
             for sketch in sketches[i]! {
-                canvasView.layer.addSublayer(sketch)
+                canvasView.otherLayer.addSublayer(sketch)
             }
         }
         currentFrame = i
@@ -353,12 +396,14 @@ class CanvasViewController: UIViewController {
         let width = Int(self.timelineStack.frame.width)
         let newSliderConstant = currentFrame*(width-2)/frames.count+5
         self.timelineSliderConstraint.constant = CGFloat(newSliderConstant)
+        canvasView.reloadView()
     }
     
     @IBAction func duplicateFrame(_ sender: UIButton) {
         if (lastFrame > -1 && sketches[lastFrame] != nil) {
             for sketch in sketches[lastFrame]! {
-                canvasView.layer.addSublayer(sketch)
+                canvasView.otherLayer.addSublayer(sketch)
+                canvasView.reloadView()
             }
         }
     }
@@ -458,12 +503,15 @@ class CanvasViewController: UIViewController {
                             sketch.render(in: UIGraphicsGetCurrentContext()!)
                         }
                     }
-                    var videoFrame:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+                    var temp = UIGraphicsGetImageFromCurrentImageContext()!
+                    self.filter.inputImage = CIImage(image: temp)!
+                    var videoFrame:UIImage = UIImage(ciImage: self.filter.outputImage)
                     
                     UIGraphicsBeginImageContextWithOptions(videoSize, false, 0)
                     let areaSize = CGRect(x: 0, y: 0, width: videoSize.width, height: videoSize.height)
                     UIImage(cgImage: image!, scale:1.0, orientation:orientation).draw(in: areaSize)
                     videoFrame.draw(in:areaSize)
+                    
                     videoFrame = UIGraphicsGetImageFromCurrentImageContext()!
                     
                     let lastFrameTime = CMTimeMake(Int64(frameCount), videoFPS)
@@ -541,12 +589,18 @@ class CanvasViewController: UIViewController {
             // Create asset writer
             let newWriter = try AVAssetWriter(outputURL: pathURL, fileType: AVFileType.mov)
             
-            // Define settings for video input
-            let videoSettings: [String: AnyObject] = [
-                AVVideoCodecKey: AVVideoCodecType.h264 as AnyObject,
+            var videoSettings: [String: AnyObject] = [
                 AVVideoWidthKey: size.width as AnyObject,
                 AVVideoHeightKey: size.height as AnyObject
             ]
+            // Define settings for video input
+            if #available(iOS 11.0, *) {
+                videoSettings = [
+                    AVVideoCodecKey: AVVideoCodecType.h264 as AnyObject,
+                    AVVideoWidthKey: size.width as AnyObject,
+                    AVVideoHeightKey: size.height as AnyObject
+                ]
+            }
             
             // Add video input to writer
             let assetWriterVideoInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings)
@@ -668,6 +722,7 @@ class CanvasViewController: UIViewController {
         self.getFrames(aroundIndex: 0)
         lastFrame = -1;
         self.showFrame(0)
+        self.siblingSketchView.image = nil
     }
     
     func hapticAlert() {
@@ -719,16 +774,20 @@ extension CanvasViewController : UIImagePickerControllerDelegate, UINavigationCo
 //                        if let writeResult = writeResult, writeResult {
 //                            self.videoUrl = videoURL as URL
                         
-                            print("success")
-                            DispatchQueue.main.async {
+                        print("success")
+                        DispatchQueue.main.async {
+                            if (self.videoUrl != nil) {
                                 self.asset = AVAsset(url:self.videoUrl)
-                                if (self.videoUrl != nil && self.asset.tracks.count > 0) {
+                                if (self.asset.tracks.count > 0) {
                                     self.initVideo()
                                     self.dismiss(animated: true, completion: nil)
                                 } else {
                                     self.launchView.isHidden = false
                                 }
+                            } else {
+                                self.launchView.isHidden = false
                             }
+                        }
                     }
                 })
             }
