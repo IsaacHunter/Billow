@@ -49,6 +49,13 @@ class CanvasView: UIView {
         }
         history[historyIndex] = otherLayer.sublayers
         historyIndex=historyIndex+1
+        
+        for layer:CALayer in self.layer.sublayers ?? [] {
+            otherLayer.addSublayer(layer)
+        }
+        self.layer.sublayers = []
+        self.setNeedsDisplay()
+        self.reloadView()
         NSLog("ended")
     }
     
@@ -92,8 +99,13 @@ class CanvasView: UIView {
         shapeLayer.fillColor = UIColor.clear.cgColor
         
         // adding the shapelayer to the vies layer and forcing a redraw
-        otherLayer.addSublayer(shapeLayer)
-        self.reloadView()
+        if (erase) {
+            otherLayer.addSublayer(shapeLayer)
+            self.reloadView()
+        } else {
+            self.layer.addSublayer(shapeLayer)
+            self.setNeedsDisplay()
+        }
     }
     
     func clearCanvas() -> [CALayer]? {

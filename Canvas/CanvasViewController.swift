@@ -75,6 +75,7 @@ class CanvasViewController: UIViewController {
             sender.setImage(UIImage(named:"erase-down"), for: .normal)
             colorBtn.setImage(UIImage(named:"icon-paint"), for: .normal)
             erase = true
+            canvasView.erase = true
         } else {
             whiteBtn.setImage(UIImage(named:"color-white"), for: .normal)
             blackBtn.setImage(UIImage(named:"color-black"), for: .normal)
@@ -118,6 +119,7 @@ class CanvasViewController: UIViewController {
             sender.setImage(UIImage(named:"color-menu"), for: .normal)
             eraseBtn.setImage(UIImage(named:"erase"), for: .normal)
             erase = false
+            canvasView.erase = false
             canvasView.lineColor = savedColor
         } else {
             if (colorsViewConstraint.constant == 0) {
@@ -503,9 +505,11 @@ class CanvasViewController: UIViewController {
                             sketch.render(in: UIGraphicsGetCurrentContext()!)
                         }
                     }
-                    var temp = UIGraphicsGetImageFromCurrentImageContext()!
+                    let temp = UIGraphicsGetImageFromCurrentImageContext()!
                     self.filter.inputImage = CIImage(image: temp)!
                     var videoFrame:UIImage = UIImage(ciImage: self.filter.outputImage)
+                    
+                    UIGraphicsEndImageContext()
                     
                     UIGraphicsBeginImageContextWithOptions(videoSize, false, 0)
                     let areaSize = CGRect(x: 0, y: 0, width: videoSize.width, height: videoSize.height)
@@ -521,9 +525,10 @@ class CanvasViewController: UIViewController {
                         print("Error converting images to video: AVAssetWriterInputPixelBufferAdapter failed to append pixel buffer")
                         return
                     }
+                    
+                    UIGraphicsEndImageContext()
                 }
                 
-                UIGraphicsEndImageContext()
                 
                 frameCount += 1
             }
@@ -547,10 +552,12 @@ class CanvasViewController: UIViewController {
                             let compositionVideoTrack = composition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID: kCMPersistentTrackID_Invalid)
                             try compositionVideoTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, inputVideoAsset.duration), of: videoAssetTrack, at: kCMTimeZero)
                             
-                            let audioStartTime = kCMTimeZero
-                            guard let audioAssetTrack = audioAsset.tracks(withMediaType: AVMediaType.audio).first else { return }
-                            let compositionAudioTrack = composition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID: kCMPersistentTrackID_Invalid)
-                            try compositionAudioTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, audioAsset.duration), of: audioAssetTrack, at: audioStartTime)
+                            if (tracks.count > 0) {
+                                let audioStartTime = kCMTimeZero
+                                guard let audioAssetTrack = audioAsset.tracks(withMediaType: AVMediaType.audio).first else { return }
+                                let compositionAudioTrack = composition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID: kCMPersistentTrackID_Invalid)
+                                try compositionAudioTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, audioAsset.duration), of: audioAssetTrack, at: audioStartTime)
+                            }
                             
                             guard let assetExport = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality) else { return }
                             assetExport.outputFileType = AVFileType.mov
@@ -636,7 +643,7 @@ class CanvasViewController: UIViewController {
                     NSLog("Error: Failed to allocate pixel buffer from pool")
                 }
                 
-                pixelBufferPointer.deallocate(capacity: 1)
+                pixelBufferPointer.deallocate()
             }
         
         return appendSucceeded
