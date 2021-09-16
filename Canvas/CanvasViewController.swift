@@ -150,7 +150,7 @@ class CanvasViewController: UIViewController {
     var prevTimer: Timer?
     
     func getTimelineThumbs() {
-        var times:[CMTime] = []
+        var times:[NSValue] = []
         let track = asset.tracks(withMediaType: AVMediaType.video).first
         if (track != nil) {
             let size = track!.naturalSize.applying(track!.preferredTransform)
@@ -159,7 +159,7 @@ class CanvasViewController: UIViewController {
             
             for i:Int in 0 ..< Int(ceil(numThumbs)) {
                 let time:CMTime = CMTimeMakeWithSeconds(Float64(i)*duration/Float64(ceil(numThumbs)), 600);
-                times.append(time)
+                times.append(time as NSValue)
             }
             
             self.generator = AVAssetImageGenerator(asset:asset) // possibly be sitting locally and just be refreshed when importing new footage
@@ -169,7 +169,7 @@ class CanvasViewController: UIViewController {
             
             self.generator.generateCGImagesAsynchronously(forTimes: times as [NSValue]) { (requestedTime, image, actualTime, result, error) in
                 DispatchQueue.main.async {
-                    let loc = times.firstIndex(of: requestedTime)
+                    let loc = times.firstIndex(of: requestedTime as NSValue)
                     let image =  UIImage(cgImage: image!)
                     let imageView = UIImageView(image: image)
                     let width = Int(abs(size.width)*self.timelineStack.frame.height/abs(size.height))
@@ -240,7 +240,7 @@ class CanvasViewController: UIViewController {
         spinner.startAnimating()
         imagePicker.delegate = self
         self.videoUrl = UserDefaults.standard.url(forKey: "videoUrl")
-        if (self.videoUrl != nil ) {
+        if (self.videoUrl != nil && false ) {
             self.asset = AVAsset(url:self.videoUrl)
             if (self.asset.tracks.count > 0) {
                 DispatchQueue.main.async {
